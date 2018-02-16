@@ -6,16 +6,29 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 import pandas as pd
+import argparse 
 
-with open('/home/babdulla/DNN/wikiall/wikipedia.semi-cleaned.nt') as txtFile:
+# read options from user input, and generate dataset.
+DISCR = 'Generate one-line document for wiki text.'
+parser = argparse.ArgumentParser(description=DISCR)
+parser.add_argument('-input', type=str, help='Path to input file.', required=True)
+parser.add_argument('-output', type=str, help='Path to output file.', required=True)
+
+args = parser.parse_args()
+
+# '/home/babdulla/DNN/wikiall/wikipedia.semi-cleaned.nt'
+
+print('Reading raw data from disk ...')
+with open(args.input) as txtFile:
     wiki_text = txtFile.readlines()
 
 # segment by sentence 
 # this data structure is as list of tuples (doc_str, doc_len)
-# [(doc_1, len(doc_1)), (doc_2, len(doc_2), ..., (doc_N, len(doc_N)]
+# [(doc_1, len(doc_1)), (doc_2, len(doc_2)), ..., (doc_N, len(doc_N))]
 
 docs = list()
 
+print('Processing documents ...')
 for doc in wiki_text:    
     # ignore the first title sentence
     sentences = doc.split('||')[1:]
@@ -30,9 +43,11 @@ for doc in wiki_text:
         
     docs.append((' '.join(sentences).strip(), doc_length))
 
+
 # make sure everything is right
 for doc in docs:
     assert doc[1] == len(doc[0].split()), 'Length mismatch'
+
 
 def make_segments(max_len):
     """
@@ -64,28 +79,17 @@ def make_segments(max_len):
                 
     return segments              
 
-
+print('Segmenting long documents ...')
 segments = make_segments(499)
 
+# writing docs to disk 
+print('Writing processed documents to disk ...')
+for d in segments:
+    with open(args.output, 'a+', encoding="utf8") as oFile:
+        oFile.write(d + '\n')
 
+# get some stats about the segmented docs
 lengths = list()
-
-"""
-for s in segments:
-    l = len(s.split())
-    
-    if l < 40:
-        print('-->', l, s)
-
-
-
-for d, l in docs:
-
-    if l < 10:
-        print('-->', l, d)
-
-
-"""
 
 data = [len(s.split()) for s in segments]
 lengths = np.array(data)
