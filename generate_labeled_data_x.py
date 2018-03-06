@@ -28,7 +28,7 @@ for line in lines:
 
 docs_labeled = list()
 
-for i in range(len(documents[:50000])): # 
+for i in range(len(documents)): # [:50000]
     doc_IVs = list(); OOV_PNs = list(); clusters = list()
     
     if (i+1)%10000 == 0: print(i+1, ' docs processed so far.')
@@ -53,20 +53,10 @@ doc_clusters = [set(doc[2]) for doc in docs_labeled]
 
 
 print('Writing cleaned data to disk ...')
-with open('/home/babdulla/DNN/wiki-data/wikidocs.tiny.IVs', mode="w") as ivFile:
-    for words in doc_words:
-        ivFile.write(' '.join(words) + '\n')
-
-with open('/home/babdulla/DNN/wiki-data/wikidocs.tiny.OOVs', mode="w") as oovFile:
-    for OOVs in doc_OOV_PNs:
-        oovFile.write(' '.join(OOVs) + '\n')
-
-with open('/home/babdulla/DNN/wiki-data/wikidocs.tiny.clusters', mode="w") as cFile:
-    for clusters in doc_clusters:
-        try:
-            cFile.write(' '.join(str(c) for c in clusters) + '\n')
-        except:
-            print(clusters)
+with open('/home/babdulla/DNN/wiki-data/wikidocs.csv', mode="w") as oFile:
+    oFile.write('words,clusters\n')
+    for (W, C) in zip(doc_words, doc_clusters):
+        oFile.write(' '.join(W) + ',' + ' '.join(str(c) for c in C) + '\n')
 
 print('Computing some stats ...')
 n_labels = [len(set(l_list)) for l_list in doc_clusters]
